@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -19,8 +20,10 @@ import com.buwoyouwo.util.graphics.BufferedCanvas;
 import com.buwoyouwo.util.graphics.FPSController;
 import com.buwoyouwo.util.graphics.IFPSController;
 import com.buwoyouwo.util.graphics.IFPSListener;
+import com.buwoyouwo.util.graphics2d.shapes.Curve2D;
 import com.buwoyouwo.util.sys.IStopwatch;
 import com.buwoyouwo.util.sys.Stopwatch;
+import com.buwoyouwo.util.vector.Integer2;
 
 public class TestFPSController extends JFrame 
 	implements ActionListener, IFPSListener
@@ -203,10 +206,45 @@ class DrawCanvas extends BufferedCanvas{
         g.setColor(Color.blue);
         g.fillRect(x, y, l, l);
         
+        Integer2[] line = generateCurve(size.width, size.height);
+        for(int i = 1; i < line.length; i++){
+        	g.drawLine(line[i-1].getX(), line[i-1].getY(), line[i].getX(), line[i].getY());
+        }
         
+        if(controlPoints != null){
+        	for(int i = 1; i < controlPoints.length; i++){
+        		g.drawOval(controlPoints[i].getX(), controlPoints[i].getY(), 20, 20);
+        	}
+        }
         
         //super.paint(g);
     }  
+    
+    Integer2[] controlPoints;
+    private Integer2[] generateCurve(int xRange, int yRange){
+    	int xStage;
+		int yStage;
+    	if(controlPoints == null){
+    		controlPoints = new Integer2[10];
+    		xStage = xRange / (controlPoints.length + 1);
+    		yStage = yRange / (controlPoints.length + 1);
+    		Random random = new Random();
+    		for(int  i = 0; i < controlPoints.length; i++){
+    			int x = random.nextInt(2*xStage) + i*xStage;
+    			int y = random.nextInt(2*yStage) + i*yStage;
+    			controlPoints[i] = new Integer2(x,y);
+    		}
+    	}
+    	xStage = xRange / (controlPoints.length + 1);
+		yStage = yRange / (controlPoints.length + 1);
+    	Random rdm = new Random();
+    	for(int i = 0; i < controlPoints.length; i++ ){
+    		controlPoints[i].setX(controlPoints[i].getX() + rdm.nextInt(xStage/10) - xStage/20);
+    		controlPoints[i].setY(controlPoints[i].getY() + rdm.nextInt(yStage/10) - yStage/20);
+    	}
+    	
+    	return Curve2D.bezier(controlPoints,0.1f);
+    }
     
     
 //    public void repaint(){
